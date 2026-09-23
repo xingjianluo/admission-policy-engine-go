@@ -1,0 +1,7 @@
+[
+  {"kind": "Pod", "namespace": "prod", "name": "web"},
+  {"kind": "Pod", "namespace": "prod", "name": "whitelist-pod"},
+  {"kind": "Pod", "namespace": "prod", "name": "agent", "labels": {"tier": "system"}},
+  {"kind": "Pod", "namespace": "dev", "name": "web"},
+  {"kind": "ConfigMap", "namespace": "prod", "name": "cfg"}
+]

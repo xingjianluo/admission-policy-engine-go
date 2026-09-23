@@ -1,0 +1,25 @@
+{
+  "policies": [
+    {
+      "name": "default-allow",
+      "rules": [
+        {"name": "allow-all", "effect": "allow", "priority": 0, "match": {"kinds": ["Pod", "ConfigMap", "Service"]}}
+      ]
+    },
+    {
+      "name": "prod-guard",
+      "rules": [
+        {
+          "name": "deny-prod-pods",
+          "effect": "deny",
+          "priority": 100,
+          "match": {"kinds": ["Pod"], "namespaces": ["prod"]},
+          "except": [
+            {"names": ["whitelist-pod"]},
+            {"labels": {"tier": "system"}}
+          ]
+        }
+      ]
+    }
+  ]
+}
