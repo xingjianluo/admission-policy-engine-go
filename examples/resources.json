@@ -1,0 +1,10 @@
+{
+  "resources": [
+    {"kind": "Pod", "namespace": "prod", "name": "web-1", "labels": {"app": "web"}},
+    {"kind": "Pod", "namespace": "prod", "name": "debug-shell", "labels": {"mode": "debug"}},
+    {"kind": "Pod", "namespace": "sandbox", "name": "debug-shell-sb", "labels": {"mode": "debug"}},
+    {"kind": "Pod", "namespace": "prod", "name": "web-latest", "labels": {"image-tag": "latest"}},
+    {"kind": "Service", "namespace": "prod", "name": "web-svc"},
+    {"kind": "ConfigMap", "namespace": "prod", "name": "app-config"}
+  ]
+}

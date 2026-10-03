@@ -10,10 +10,11 @@ import (
 // snapshot 是不可变的已编译策略视图，热更新时整体替换。
 type snapshot struct {
 	policies []Policy // 已按优先级降序、名称升序排序，保证结论与书写顺序无关
+	version  uint64   // 该视图对应的版本号，判定结果原样带出
 }
 
-// compile 将策略列表编译为不可变视图：复制并稳定排序。
-func compile(policies []Policy) *snapshot {
+// compile 将策略列表编译为不可变视图：复制并稳定排序，并绑定版本号。
+func compile(policies []Policy, version uint64) *snapshot {
 	cp := make([]Policy, len(policies))
 	copy(cp, policies)
 	// 优先级高者先评估；同级按名称排序，保证结论确定、与清单书写顺序无关。
@@ -23,7 +24,7 @@ func compile(policies []Policy) *snapshot {
 		}
 		return cp[i].Name < cp[j].Name
 	})
-	return &snapshot{policies: cp}
+	return &snapshot{policies: cp, version: version}
 }
 
 // matches 判断选择器是否命中资源：所有非空字段需同时满足。
@@ -51,12 +52,19 @@ func contains(list []string, v string) bool {
 	return false
 }
 
-// evaluate 在单个一致视图上评估资源。
+// evaluate 在单个一致视图上评估资源，并为结论打上该视图的版本号。
 // 语义：
 //   - 例外只对命中该规则的资源生效，被例外的规则视为未命中；
 //   - 拒绝覆盖放行，与规则书写顺序无关；
 //   - ctx 被取消时立即中止评估。
 func (s *snapshot) evaluate(ctx context.Context, res Resource) Decision {
+	d := s.eval(ctx, res)
+	d.Version = s.version
+	return d
+}
+
+// eval 是 evaluate 的核心逻辑，不处理版本号。
+func (s *snapshot) eval(ctx context.Context, res Resource) Decision {
 	var denied, allowed, excepted []string
 
 	for i := range s.policies {

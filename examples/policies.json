@@ -1,0 +1,29 @@
+{
+  "policies": [
+    {
+      "name": "deny-debug-pods",
+      "effect": "deny",
+      "priority": 20,
+      "match": {"kinds": ["Pod"], "labels": {"mode": "debug"}},
+      "except": [{"namespaces": ["sandbox"]}]
+    },
+    {
+      "name": "deny-prod-latest",
+      "effect": "deny",
+      "priority": 15,
+      "match": {"namespaces": ["prod"], "labels": {"image-tag": "latest"}}
+    },
+    {
+      "name": "allow-pods",
+      "effect": "allow",
+      "priority": 10,
+      "match": {"kinds": ["Pod"]}
+    },
+    {
+      "name": "allow-services",
+      "effect": "allow",
+      "priority": 10,
+      "match": {"kinds": ["Service"]}
+    }
+  ]
+}

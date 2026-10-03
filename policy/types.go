@@ -52,4 +52,6 @@ type Decision struct {
 	MatchedPolicies  []string   `json:"matchedPolicies,omitempty"`
 	ExceptedPolicies []string   `json:"exceptedPolicies,omitempty"`
 	Explanation      string     `json:"explanation"`
+	// Version 是本次判定所用策略视图的版本号，用于版本溯源。
+	Version uint64 `json:"version"`
 }
