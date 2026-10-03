@@ -1,0 +1,23 @@
+{
+  "policies": [
+    {
+      "name": "allow-pods",
+      "effect": "allow",
+      "priority": 10,
+      "match": {"kinds": ["Pod"]}
+    },
+    {
+      "name": "deny-debug-pods",
+      "effect": "deny",
+      "priority": 20,
+      "match": {"kinds": ["Pod"], "labels": {"mode": "debug"}},
+      "except": [{"namespaces": ["sandbox"]}]
+    },
+    {
+      "name": "deny-prod-secrets",
+      "effect": "deny",
+      "priority": 30,
+      "match": {"kinds": ["Secret"], "namespaces": ["prod"]}
+    }
+  ]
+}

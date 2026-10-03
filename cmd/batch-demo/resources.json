@@ -1,0 +1,10 @@
+{
+  "resources": [
+    {"kind": "Pod", "namespace": "prod", "name": "web", "labels": {"app": "web"}},
+    {"kind": "Pod", "namespace": "prod", "name": "debugger", "labels": {"mode": "debug"}},
+    {"kind": "Pod", "namespace": "sandbox", "name": "debugger-sandbox", "labels": {"mode": "debug"}},
+    {"kind": "Secret", "namespace": "prod", "name": "db-password"},
+    {"kind": "Secret", "namespace": "dev", "name": "dev-token"},
+    {"kind": "ConfigMap", "namespace": "prod", "name": "app-config"}
+  ]
+}

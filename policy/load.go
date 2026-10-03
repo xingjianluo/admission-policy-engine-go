@@ -10,11 +10,12 @@ import (
 type LoadErrorCode string
 
 const (
-	ErrMissingField   LoadErrorCode = "MISSING_FIELD"  // 必填字段缺失
-	ErrInvalidType    LoadErrorCode = "INVALID_TYPE"   // 字段类型错误
-	ErrInvalidValue   LoadErrorCode = "INVALID_VALUE"  // 字段取值非法
-	ErrConflictingPol LoadErrorCode = "CONFLICT"       // 策略间相互冲突
-	ErrMalformedDoc   LoadErrorCode = "MALFORMED_DOC"  // 清单整体无法解析
+	ErrMissingField   LoadErrorCode = "MISSING_FIELD"   // 必填字段缺失
+	ErrInvalidType    LoadErrorCode = "INVALID_TYPE"    // 字段类型错误
+	ErrInvalidValue   LoadErrorCode = "INVALID_VALUE"   // 字段取值非法
+	ErrConflictingPol LoadErrorCode = "CONFLICT"        // 策略间相互冲突
+	ErrMalformedDoc   LoadErrorCode = "MALFORMED_DOC"   // 清单整体无法解析
+	ErrEmptyCandidate LoadErrorCode = "EMPTY_CANDIDATE" // 候选清单不含任何可用策略
 )
 
 // LoadError 描述单条策略的加载失败，原因可区分且稳定。

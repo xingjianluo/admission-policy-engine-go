@@ -9,11 +9,12 @@ import (
 
 // snapshot 是不可变的已编译策略视图，热更新时整体替换。
 type snapshot struct {
+	version  int64    // 只增不减的版本标识；初始视图为 1，每次成功更新 +1
 	policies []Policy // 已按优先级降序、名称升序排序，保证结论与书写顺序无关
 }
 
 // compile 将策略列表编译为不可变视图：复制并稳定排序。
-func compile(policies []Policy) *snapshot {
+func compile(policies []Policy, version int64) *snapshot {
 	cp := make([]Policy, len(policies))
 	copy(cp, policies)
 	// 优先级高者先评估；同级按名称排序，保证结论确定、与清单书写顺序无关。
@@ -23,7 +24,7 @@ func compile(policies []Policy) *snapshot {
 		}
 		return cp[i].Name < cp[j].Name
 	})
-	return &snapshot{policies: cp}
+	return &snapshot{version: version, policies: cp}
 }
 
 // matches 判断选择器是否命中资源：所有非空字段需同时满足。
@@ -66,6 +67,7 @@ func (s *snapshot) evaluate(ctx context.Context, res Resource) Decision {
 				Effect:      EffectDeny,
 				Reason:      ReasonCanceled,
 				Explanation: fmt.Sprintf("evaluation canceled: %v", err),
+				Version:     s.version,
 			}
 		}
 		p := &s.policies[i]
@@ -87,34 +89,41 @@ func (s *snapshot) evaluate(ctx context.Context, res Resource) Decision {
 	switch {
 	case len(denied) > 0:
 		// 拒绝覆盖放行：无论放行规则是否命中、书写顺序如何。
-		return Decision{
+		d := Decision{
 			Effect:           EffectDeny,
 			Reason:           ReasonDenied,
 			MatchedPolicies:  denied,
 			ExceptedPolicies: excepted,
 			Explanation:      explain("denied by", denied, allowed, excepted),
 		}
+		d.Version = s.version
+		return d
 	case len(allowed) > 0:
-		return Decision{
+		d := Decision{
 			Effect:           EffectAllow,
 			Reason:           ReasonAllowed,
 			MatchedPolicies:  allowed,
 			ExceptedPolicies: excepted,
 			Explanation:      explain("allowed by", allowed, nil, excepted),
 		}
+		d.Version = s.version
+		return d
 	case len(excepted) > 0:
 		// 规则命中但全部被例外跳过：与"未命中"可区分。
-		return Decision{
+		d := Decision{
 			Effect:           EffectAllow,
 			Reason:           ReasonExcepted,
 			ExceptedPolicies: excepted,
 			Explanation:      fmt.Sprintf("all matched policies skipped by exception: %s", strings.Join(excepted, ", ")),
 		}
+		d.Version = s.version
+		return d
 	default:
 		return Decision{
 			Effect:      EffectAllow,
 			Reason:      ReasonNoMatch,
 			Explanation: "no policy matched the resource",
+			Version:     s.version,
 		}
 	}
 }
